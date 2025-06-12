@@ -1,12 +1,17 @@
-FROM busybox:latest
-ENV PORT=8000
-LABEL maintainer="Chris <c@crccheck.com>"
+FROM alpine:latest
+ENV PORT=80
 
-ADD index.html /www/index.html
+# Install lighttpd (a lightweight web server) and curl
+RUN apk --no-cache add lighttpd curl
 
-# EXPOSE $PORT
+# Copy your HTML file to the default web server directory
+ADD index.html /var/www/localhost/htdocs/index.html
 
-HEALTHCHECK CMD nc -z localhost $PORT
+EXPOSE $PORT
 
-# Create a basic webserver and run it until the container is stopped
-CMD echo "httpd started" && trap "exit 0;" TERM INT; httpd -v -p $PORT -h /www -f & wait
+# Simple health check
+HEALTHCHECK --interval=5s --timeout=3s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:$PORT || exit 1
+
+# Start lighttpd in foreground mode
+CMD ["lighttpd", "-D", "-f", "/etc/lighttpd/lighttpd.conf"]
