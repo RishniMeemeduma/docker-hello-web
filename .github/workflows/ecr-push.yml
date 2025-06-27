@@ -54,3 +54,8 @@ jobs:
         # Push both tagged versions
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+
+    - name: Deploy to Amazon ECS
+      if: ${{ steps.check_merge.outputs.is_merge == 'true' }}
+      run: |
+        aws ecs update-service --cluster tif-portal-dev-cluster --service tif-dev-eu-west-2-service-api --force-new-deployment
