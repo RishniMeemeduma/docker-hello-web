@@ -18,6 +18,10 @@ jobs:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: 'eu-west-2'
+        role-skip-session-tagging: true
+        role-duration-seconds: 1200
+        audience: '' 
+        
         
     # - name: Login to Amazon ECR
     #   id: login-ecr
