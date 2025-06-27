@@ -1,11 +1,29 @@
-FROM alpine:latest
+FROM alpine:3.18
 ENV PORT=80
+# Install lighttpd, PHP, and required extensions
+RUN apk --no-cache add \
+    lighttpd \
+    php81 \
+    php81-fpm \
+    php81-curl \
+    php81-json \
+    php81-common \
+    curl
 
-# Install lighttpd (a lightweight web server) and curl
-RUN apk --no-cache add lighttpd curl
+# Configure lighttpd with PHP
+RUN mkdir -p /run/lighttpd && \
+    echo 'server.modules += ( "mod_fastcgi" )' >> /etc/lighttpd/lighttpd.conf && \
+    echo 'fastcgi.server = ( ".php" => ((' >> /etc/lighttpd/lighttpd.conf && \
+    echo '    "socket" => "/tmp/php-fpm.sock",' >> /etc/lighttpd/lighttpd.conf && \
+    echo '    "bin-path" => "/usr/bin/php-cgi81"' >> /etc/lighttpd/lighttpd.conf && \
+    echo ')))' >> /etc/lighttpd/lighttpd.conf && \
+    sed -i 's/index.html/index.php index.html/g' /etc/lighttpd/lighttpd.conf
 
-# Copy your HTML file to the default web server directory
-ADD index.html /var/www/localhost/htdocs/index.html
+# Copy your PHP file (rename your current index.html to index.php)
+COPY index.php /var/www/localhost/htdocs/index.php
+
+# Set proper permissions
+RUN chmod 755 /var/www/localhost/htdocs/index.php
 
 EXPOSE $PORT
 
