@@ -29,8 +29,8 @@ RUN chown -R www-data:www-data /var/www/html/
 EXPOSE 80
 
 # Define health check
-HEALTHCHECK --interval=5s --timeout=3s --start-period=5s --retries=3 \
-  CMD curl -f http://localhost:$PORT || exit 1
+HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
+  CMD curl -f http://localhost/health || exit 1
 
 # No need for custom start script, Apache starts automatically
 CMD ["apache2-foreground"]
