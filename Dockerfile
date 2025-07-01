@@ -1,35 +1,32 @@
-FROM alpine:3.18
-ENV PORT=80
-# Install lighttpd, PHP, and required extensions
-RUN apk --no-cache add \
-    lighttpd \
-    php81 \
-    php81-fpm \
-    php81-curl \
-    php81-json \
-    php81-common \
-    curl
+FROM php:8.1-apache
 
-# Configure lighttpd with PHP
-RUN mkdir -p /run/lighttpd && \
-    echo 'server.modules += ( "mod_fastcgi" )' >> /etc/lighttpd/lighttpd.conf && \
-    echo 'fastcgi.server = ( ".php" => ((' >> /etc/lighttpd/lighttpd.conf && \
-    echo '    "socket" => "/tmp/php-fpm.sock",' >> /etc/lighttpd/lighttpd.conf && \
-    echo '    "bin-path" => "/usr/bin/php-cgi81"' >> /etc/lighttpd/lighttpd.conf && \
-    echo ')))' >> /etc/lighttpd/lighttpd.conf && \
-    sed -i 's/index.html/index.php index.html/g' /etc/lighttpd/lighttpd.conf
+# Install curl and other required packages
+RUN apt-get update && apt-get install -y \
+    curl \
+    libcurl4-openssl-dev \
+    && docker-php-ext-install curl \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copy your PHP file (rename your current index.html to index.php)
-COPY index.php /var/www/localhost/htdocs/index.php
+# Configure Apache - Set ServerName to suppress the FQDN warning
+RUN echo 'ServerName localhost' >> /etc/apache2/apache2.conf
 
-# Set proper permissions
-RUN chmod 755 /var/www/localhost/htdocs/index.php
+# Configure PHP settings
+RUN echo 'memory_limit = 128M' > /usr/local/etc/php/conf.d/custom.ini \
+    && echo 'max_execution_time = 30' >> /usr/local/etc/php/conf.d/custom.ini \
+    && echo 'upload_max_filesize = 20M' >> /usr/local/etc/php/conf.d/custom.ini \
+    && echo 'post_max_size = 20M' >> /usr/local/etc/php/conf.d/custom.ini \
+    && echo 'display_errors = On' >> /usr/local/etc/php/conf.d/custom.ini \
+    && echo 'error_reporting = E_ALL' >> /usr/local/etc/php/conf.d/custom.ini
 
-EXPOSE $PORT
+# Copy application file
+COPY index.php /var/www/html/
 
-# Simple health check
-HEALTHCHECK --interval=5s --timeout=3s --start-period=5s --retries=3 \
-  CMD curl -f http://localhost:$PORT || exit 1
+# Set permissions
+RUN chown -R www-data:www-data /var/www/html/
 
-# Start lighttpd in foreground mode
-CMD ["lighttpd", "-D", "-f", "/etc/lighttpd/lighttpd.conf"]
+# Expose port 80
+EXPOSE 80
+
+# No need for custom start script, Apache starts automatically
+CMD ["apache2-foreground"]
