@@ -73,11 +73,11 @@ function checkCacheResult($apiUrl, $checkCache) {
     <h3>Cache Connectivity Result:</h3>
     <pre><?php echo $cacheCheckResult; ?></pre>
 <?php endif; ?>
-<
+
 <?php
 if (isset($_POST['submit'])) {
-    if ($_POST['check_cache']) {
-        $checkResult = checkCacheResult($_POST['apiurl'], $_POST['check_cache']);
+    if (isset($_POST['check_cache'])) {
+        $cacheCheckResult = checkCacheResult($_POST['apiurl'], $_POST['check_cache']);
     } else {
         $result = insertData($_POST['name'], $_POST['email'], $_POST['apiurl']);
         echo '<pre>' . $result . '</pre>';
