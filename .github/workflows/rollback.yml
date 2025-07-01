@@ -1,4 +1,4 @@
-name: Rollback to Known Commit
+name: Rollback to Commit or Last Known Image
 
 on:
   workflow_dispatch:
