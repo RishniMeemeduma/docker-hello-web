@@ -5,7 +5,7 @@ on:
     inputs:
       commit_sha:
         description: "Commit SHA to roll back to"
-        required: true
+        required: false
 
 jobs:
   rollback:
@@ -29,7 +29,14 @@ jobs:
     - name: Construct image URI
       id: image
       run: |
-        IMAGE_URI="${{ steps.login-ecr.outputs.registry }}/tif-web:${{ github.event.inputs.commit_sha }}"
+        if [ -n "${{ github.event.inputs.commit_sha }}" ]; then
+          echo "Rolling back to manually provided commit: ${{ github.event.inputs.commit_sha }}"
+          IMAGE_URI="${{ steps.login-ecr.outputs.registry }}/tif-web:${{ github.event.inputs.commit_sha }}"
+        else
+          echo "No commit SHA provided, fetching previous image from SSM..."
+          IMAGE_URI=$(aws ssm get-parameter --name "/tif-web/previous-image" --query Parameter.Value --output text)
+        fi
+        echo "Using image: $IMAGE_URI"
         echo "image=$IMAGE_URI" >> $GITHUB_OUTPUT
 
     - name: Download current task definition
