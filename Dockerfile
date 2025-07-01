@@ -22,6 +22,9 @@ RUN echo 'memory_limit = 128M' > /usr/local/etc/php/conf.d/custom.ini \
 # Copy application file
 COPY index.php /var/www/html/
 
+# Create a static health file
+RUN echo '{"status":"healthy"}' > /var/www/html/health
+
 # Set permissions
 RUN chown -R www-data:www-data /var/www/html/
 

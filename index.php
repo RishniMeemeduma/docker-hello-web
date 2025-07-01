@@ -1,12 +1,9 @@
 <?php
 // Health check endpoint for AWS ECS and Docker health checks
-if ($_SERVER['REQUEST_URI'] === '/health') {
+if ($_SERVER['REQUEST_URI'] === '/health' || $_SERVER['REQUEST_URI'] === '/health/') {
     header('Content-Type: application/json');
-    echo json_encode([
-        'status' => 'healthy',
-        'timestamp' => time(),
-        'service' => 'php-curl-app'
-    ]);
+    http_response_code(200); // Always return 200 OK
+    echo json_encode(['status' => 'healthy', 'timestamp' => time()]);
     exit;
 }
 
