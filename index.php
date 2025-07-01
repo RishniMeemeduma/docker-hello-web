@@ -1,4 +1,15 @@
 <?php
+// Health check endpoint for AWS ECS and Docker health checks
+if ($_SERVER['REQUEST_URI'] === '/health') {
+    header('Content-Type: application/json');
+    echo json_encode([
+        'status' => 'healthy',
+        'timestamp' => time(),
+        'service' => 'php-curl-app'
+    ]);
+    exit;
+}
+
 function insertData($name, $email, $apiUrl) {
     // Validate inputs
     if (empty($name) || empty($email) || empty($apiUrl)) {
