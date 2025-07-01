@@ -19,14 +19,18 @@ RUN echo 'memory_limit = 128M' > /usr/local/etc/php/conf.d/custom.ini \
     && echo 'display_errors = On' >> /usr/local/etc/php/conf.d/custom.ini \
     && echo 'error_reporting = E_ALL' >> /usr/local/etc/php/conf.d/custom.ini
 
-# Copy application file
-COPY index.php /var/www/html/
+# Copy application files
+COPY index.php health.php /var/www/html/
 
 # Set permissions
 RUN chown -R www-data:www-data /var/www/html/
 
 # Expose port 80
 EXPOSE 80
+
+# Define health check
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
+  CMD curl -f http://localhost/health.php || exit 1
 
 # No need for custom start script, Apache starts automatically
 CMD ["apache2-foreground"]
