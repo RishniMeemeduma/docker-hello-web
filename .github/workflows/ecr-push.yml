@@ -40,7 +40,9 @@ jobs:
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v1
 
+    # Get current image for rollback if needed
     - name: Store current image for rollback
+      id: current-image
       run: |
         CURRENT_TASK_DEF=$(aws ecs describe-task-definition --task-definition tif-dev-eu-west-2-taskdef-web  --query taskDefinition)
         CURRENT_IMAGE=$(echo $CURRENT_TASK_DEF | jq -r '.containerDefinitions[0].image')
@@ -54,6 +56,7 @@ jobs:
       
       
     - name: Build, tag, and push image to Amazon ECR
+      id: build-image
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         ECR_REPOSITORY: tif-web
