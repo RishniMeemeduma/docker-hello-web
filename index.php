@@ -34,7 +34,7 @@ function insertData($name, $email, $apiUrl) {
     return $response;
 }
 
-function checkCacheResult($apiUrl, $checkCache) {
+function checkCacheResult($apiUrl) {
     // Validate inputs
     if (empty($apiUrl)) {
         return json_encode(['error' => 'API URL is required']);
@@ -54,6 +54,7 @@ function checkCacheResult($apiUrl, $checkCache) {
     }
     
     curl_close($ch);
+
     return $response;
 }
 
@@ -73,19 +74,21 @@ function checkCacheResult($apiUrl, $checkCache) {
 
 <h1>Cache</h1>
 <form method="post" action="">
-    <input type="text" name="apiurl" id="apiurl" value="internal-tif-dev-eu-west-2-alb-api-1563388884.eu-west-2.elb.amazonaws.com" />
+    <input type="text" name="apiurl" id="apiurl-cache" value="internal-tif-dev-eu-west-2-alb-api-1563388884.eu-west-2.elb.amazonaws.com" />
 
     <button type="submit" name="check_cache" value="1">Check Cache Connectivity</button>
 </form>
 
 <?php
 if (isset($_POST['submit'])) {
-    if (isset($_POST['check_cache'])) {
-        $cacheCheckResult = checkCacheResult($_POST['apiurl'], $_POST['check_cache']);
-        echo '<pre>' . $cacheCheckResult . '</pre>';
-    } else {
-        $result = insertData($_POST['name'], $_POST['email'], $_POST['apiurl']);
-        echo '<pre>' . $result . '</pre>';
-    }
+    // Handle the RDS form submission
+    $result = insertData($_POST['name'], $_POST['email'], $_POST['apiurl']);
+    echo '<h3>API Result:</h3><pre>' . $result . '</pre>';
+}
+
+if (isset($_POST['check_cache'])) {
+    // Handle the cache check button separately
+    $cacheCheckResult = checkCacheResult($_POST['apiurl']);
+    echo '<h3>Cache Connectivity Result:</h3><pre>' . $cacheCheckResult . '</pre>';
 }
 
