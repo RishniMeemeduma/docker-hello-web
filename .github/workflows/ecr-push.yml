@@ -42,7 +42,7 @@ jobs:
 
     - name: Store current image for rollback
       run: |
-        CURRENT_IMAGE=$(aws ecs describe-services --cluster tif-portal-dev-cluster --services tif-dev-eu-west-2-taskdef-web | jq -r '.services[0].taskDefinition' | xargs aws ecs describe-task-definition --task-definition | jq -r '.taskDefinition.containerDefinitions[0].image')
+        CURRENT_IMAGE=$(aws ecs describe-services --cluster tif-dev-eu-west-2-ecs-cluster --services tif-dev-eu-west-2-taskdef-web | jq -r '.services[0].taskDefinition' | xargs aws ecs describe-task-definition --task-definition | jq -r '.taskDefinition.containerDefinitions[0].image')
         echo "Current image: $CURRENT_IMAGE"
         # Store in SSM for future rollbacks
         aws ssm put-parameter --name "/tif-web/previous-image" --type String --value "$CURRENT_IMAGE" --overwrite
